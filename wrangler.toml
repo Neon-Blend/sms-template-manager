@@ -4,4 +4,4 @@ pages_build_output_dir = "dist"
 
 [[kv_namespaces]]
 binding = "SMS_TEMPLATES"
-id = "PLACEHOLDER_KV_ID"
+id = "1fb2550ef5694f0c8c28b4d97c3de482"

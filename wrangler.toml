@@ -1,0 +1,7 @@
+name = "sms-template-manager"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
+
+[[kv_namespaces]]
+binding = "SMS_TEMPLATES"
+id = "PLACEHOLDER_KV_ID"

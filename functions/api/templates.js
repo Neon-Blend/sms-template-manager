@@ -1,19 +1,22 @@
-const KV_KEY = 'sms_templates'
+const TEMPLATE_KEYS = [
+  'new_signup',
+  'first_purchase',
+  'post_purchase',
+  'order_fulfilled',
+  'order_cancelled',
+  'abandoned_cart',
+  'refund_created',
+]
 
 export async function onRequestGet({ env }) {
   try {
-    const data = await env.SMS_TEMPLATES.get(KV_KEY, { type: 'json' })
-    if (!data) {
-      return new Response(JSON.stringify({
-        new_signup: '',
-        first_purchase: '',
-        post_purchase: '',
-        post_purchase_delay: 3,
-      }), {
-        headers: { 'Content-Type': 'application/json' },
+    const entries = await Promise.all(
+      TEMPLATE_KEYS.map(async key => {
+        const value = await env.SMS_TEMPLATES.get(key)
+        return [key, value ?? '']
       })
-    }
-    return new Response(JSON.stringify(data), {
+    )
+    return new Response(JSON.stringify(Object.fromEntries(entries)), {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (err) {
@@ -27,13 +30,13 @@ export async function onRequestGet({ env }) {
 export async function onRequestPost({ request, env }) {
   try {
     const body = await request.json()
-    const templates = {
-      new_signup: body.new_signup ?? '',
-      first_purchase: body.first_purchase ?? '',
-      post_purchase: body.post_purchase ?? '',
-      post_purchase_delay: body.post_purchase_delay ?? 3,
-    }
-    await env.SMS_TEMPLATES.put(KV_KEY, JSON.stringify(templates))
+    await Promise.all(
+      TEMPLATE_KEYS.map(key => {
+        const value = (body[key] ?? '').trim()
+        if (value === '') return Promise.resolve()
+        return env.SMS_TEMPLATES.put(key, value)
+      })
+    )
     return new Response(JSON.stringify({ success: true }), {
       headers: { 'Content-Type': 'application/json' },
     })
